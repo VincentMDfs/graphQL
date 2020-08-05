@@ -69,7 +69,7 @@ var schema = buildSchema(`
 
     type Building_detail {
         building_id: Int!
-        ikey: String
+        key: String
         value: String
     }
 
@@ -103,6 +103,7 @@ var schema = buildSchema(`
 
     type Employee {
         id: Int!
+        user_id: Int!
         email: String
         first_name: String
         last_name: String
@@ -132,8 +133,29 @@ var schema = buildSchema(`
 var root = {
     buildings: getBuildings,
     interventions: getInterventions,
+    employees: getEmployees,
 };
 
+async function getEmployees({id}) {
+    // Employee
+    var employees = await query_mysql('SELECT * FROM employees WHERE id = ' + id )
+    resolve = employees[0]
+    
+    // Interventions
+    interventions = await query_postgresql('SELECT * FROM factintervention WHERE employee_id = ' + id)
+    result = interventions[0]
+    console.log(interventions)
+
+
+    // Buildings
+    building_details = await query_mysql('SELECT * FROM building_details WHERE building_id = ' + result.building_id)
+    console.log(building_details)
+
+    resolve['interventions']= interventions;
+    resolve['building_details']= building_details;
+
+    return resolve
+};
 
 async function getBuildings({id}) {
     // Query building details from MySQL buildings table
