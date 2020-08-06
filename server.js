@@ -68,12 +68,14 @@ scalar DateTime
     }
 
     type Building_detail {
+        id: Int!
         building_id: Int
         key: String
         value: String
     }
 
     type Address {
+        id: Int!
         type_of_address: String
         status: String
         entity: String
@@ -89,6 +91,7 @@ scalar DateTime
     }
 
     type Customer {
+        id: Int!
         company_name: String
         full_name: String
         email: String
@@ -114,6 +117,7 @@ scalar DateTime
     }
 
     type Intervention {
+        id: Int!
         employee_id: Int
         building_id: Int
         battery_id: String
@@ -139,12 +143,12 @@ var root = {
 //To answer Question 1 by intervention id
 async function getInterventions({id}) {
 
-    // Query the intervention table from the PostgreSQL factintervention table
-    intervention = await query_postgresql('SELECT * FROM factintervention WHERE building_id = ' + id)
+    // Query the factintervention table from the PostgreSQL
+    intervention = await query_postgresql('SELECT * FROM factintervention WHERE id = ' + id)
     console.log(intervention)
     resolve = intervention[0]
     
-    // Query the address from the MySQL address table.
+    // Query the MySQL address table.
     address = await query_mysql('SELECT * FROM addresses JOIN buildings ON buildings.address_id = addresses.id WHERE buildings.id = ' + resolve.building_id);
     console.log(address)
     resolve['address']= address[0];
@@ -154,14 +158,16 @@ async function getInterventions({id}) {
 
 //To answer Question 2 by building id
 async function getBuildings({id}) {
-    // Query building from the MySQL buildings table
+    // Query building from the MySQL table
     var buildings = await query_mysql('SELECT * FROM buildings WHERE id = ' + id )
     resolve = buildings[0]
+    console.log(buildings)
 
-    // Query intervention from the PostgreSQL factintervention table
+    // Query intervention from the PostgreSQL table
     interventions = await query_postgresql('SELECT * FROM factintervention WHERE building_id = ' + id)
+    console.log(interventions)
 
-    //Query customer info from the MySQL buildings table
+    //Query customer info from the MySQL table
     customer = await query_mysql('SELECT * FROM customers WHERE id = ' + resolve.customer_id)
 
     resolve['customer']= customer[0];
@@ -170,20 +176,19 @@ async function getBuildings({id}) {
     return resolve
 };
 
-
 //To answer Question 3 by employee id
 async function getEmployees({id}) {
-    // Query employee from the MySQL employees table
+    // Query employee from the MySQL table
     var employees = await query_mysql('SELECT * FROM employees WHERE id = ' + id )
     resolve = employees[0]
     console.log(employees)
 
-    // Query intervention from the PostgreSQL factintervention table
+    // Query intervention from the PostgreSQL table
     interventions = await query_postgresql('SELECT * FROM factintervention WHERE employee_id = ' + id)
     result = interventions[0]
     console.log(interventions)
 
-    // Query building details from the MySQL buildings table
+    // Query building details from the MySQL  table
     building_details = await query_mysql('SELECT * FROM building_details WHERE building_id = ' + result.building_id)
     console.log(building_details)
 
