@@ -1,11 +1,8 @@
 require('dotenv').config();
-require('./db_query.js');
-require('./db_connection.js');
 var express = require('express');
 var express_graphql = require('express-graphql');
 const { graphqlHTTP } = require('express-graphql');
 var { buildSchema } = require('graphql');
-
 
 // MySQL operational DB connection BEGIN
 var mysql = require('mysql');
@@ -17,9 +14,9 @@ const con_mysql = mysql.createConnection({
 });
 con_mysql.connect(function(error){
     if (!!error) {
-        console.log("\n" + "-- > NO!, connection to the MySQL operational DB "  + process.env.MYSQL_DB_NAME + " on HOST "+process.env.MYSQL_HOST + " disgracefully failed!" + "\n");
+        console.log("\n" + "-- > NO!, connection to the MySQL operational DB "  + process.env.MYSQL_DB_NAME + " on HOST "+process.env.MYSQL_HOST + " has failed!" + "\n");
     } else {
-        console.log("\n" + "-- > YES, connection to the MySQL operational DB " + process.env.MYSQL_DB_NAME + " on HOST "+process.env.MYSQL_HOST +" successfully established with success!." + "\n");
+        console.log("\n" + "-- > YES, connection to the MySQL operational DB " + process.env.MYSQL_DB_NAME + " on HOST "+process.env.MYSQL_HOST +" has been successfully established !." + "\n");
     }
 });
 // MySQL operational DB connection END
@@ -35,28 +32,28 @@ const con_pg = new Client({
 });
 con_pg.connect(function(error){
     if (!!error) {
-        console.log("\n" + "-- > NO!, connection to the PostgreSQL decision DB "  + process.env.POSTGRESQL_DB_NAME + " on HOST "+process.env.POSTGRESQL_HOST + " disgracefully failed!" + "\n");
+        console.log("\n" + "-- > NO!, connection to the PostgreSQL decision DB "  + process.env.POSTGRESQL_DB_NAME + " on HOST "+process.env.POSTGRESQL_HOST + " failed!" + "\n");
     } else {
-        console.log("\n" + "-- > YES, connection to the PostgreSQL decision DB " + process.env.POSTGRESQL_DB_NAME + " on HOST "+process.env.POSTGRESQL_HOST +" successfully established with success!." + "\n");
+        console.log("\n" + "-- > YES, connection to the PostgreSQL decision DB " + process.env.POSTGRESQL_DB_NAME + " on HOST "+process.env.POSTGRESQL_HOST +" has been successfully established!." + "\n");
     }
 });
 // PostgreSQL decision DB connection END
 
 
-
 // GraphQL schema
+// ! means that the field is non-nullable, meaning that the GraphQL service promises to always give you a value
+// when you query this field. In the type language, we'll represent those with an exclamation mark.
 var schema = buildSchema(`
+scalar DateTime
     type Query {
         buildings(id: Int!): Building
-        intervention(building_id: Int!): Intervention
+        interventions(id: Int!): Intervention
         employees(id: Int!): Employee
     },
 
     type Building {
         id: Int!
-        address: Address
-        customer_id: Int!
-        customer: Customer
+        customer_id: Int
         admin_full_name: String
         admin_email: String
         admin_phone: String
@@ -65,10 +62,12 @@ var schema = buildSchema(`
         tech_contact_phone: String
         building_details: [Building_detail]
         interventions: [Intervention]
+        address: Address
+        customer: Customer
     }
 
     type Building_detail {
-        building_id: Int!
+        building_id: Int
         key: String
         value: String
     }
@@ -92,8 +91,8 @@ var schema = buildSchema(`
         company_name: String
         full_name: String
         email: String
-        address_id: Int!
-        user_id: Int!
+        address_id: Int
+        user_id: Int
         phone: String
         company_description: String
         tech_authority_full_name: String
@@ -103,31 +102,31 @@ var schema = buildSchema(`
 
     type Employee {
         id: Int!
-        user_id: Int!
+        user_id: Int
         email: String
         first_name: String
         last_name: String
         title: String
         building_details: [Building_detail]
         interventions: [Intervention]
+        building: [Building]
     }
 
     type Intervention {
-        employee_id: Int!
-        building_id: Int!
+        employee_id: Int
+        building_id: Int
         battery_id: String
         column_id: String
         elevator_id: String
         building_details: [Building_detail]
-        start_date: String
-        end_date: String
+        start_date: DateTime
+        end_date: DateTime
         result: String
         report: String
         status: String
+        address: Address
     }
 `);
-
-
 
 // Root resolver
 var root = {
@@ -136,36 +135,32 @@ var root = {
     employees: getEmployees,
 };
 
-async function getEmployees({id}) {
-    // Employee
-    var employees = await query_mysql('SELECT * FROM employees WHERE id = ' + id )
-    resolve = employees[0]
+//To answer Question 1 by intervention id
+async function getInterventions({id}) {
+
+    // Query the intervention table from the PostgreSQL factintervention table
+    intervention = await query_postgresql('SELECT * FROM factintervention WHERE building_id = ' + id)
+    console.log(intervention)
+    resolve = intervention[0]
     
-    // Interventions
-    interventions = await query_postgresql('SELECT * FROM factintervention WHERE employee_id = ' + id)
-    result = interventions[0]
-    console.log(interventions)
-
-
-    // Buildings
-    building_details = await query_mysql('SELECT * FROM building_details WHERE building_id = ' + result.building_id)
-    console.log(building_details)
-
-    resolve['interventions']= interventions;
-    resolve['building_details']= building_details;
+    // Query the address from the MySQL address table.
+    address = await query_mysql('SELECT * FROM addresses JOIN buildings ON buildings.address_id = addresses.id WHERE buildings.id = ' + resolve.building_id);
+    console.log(address)
+    resolve['address']= address[0];
 
     return resolve
 };
 
+//To answer Question 2 by building id
 async function getBuildings({id}) {
-    // Query building details from MySQL buildings table
+    // Query building from the MySQL buildings table
     var buildings = await query_mysql('SELECT * FROM buildings WHERE id = ' + id )
     resolve = buildings[0]
 
-    // Query building details from PostgreSQL factintervention table
+    // Query intervention from the PostgreSQL factintervention table
     interventions = await query_postgresql('SELECT * FROM factintervention WHERE building_id = ' + id)
 
-    //Query customer details from MySQL buildings table
+    //Query customer info from the MySQL buildings table
     customer = await query_mysql('SELECT * FROM customers WHERE id = ' + resolve.customer_id)
 
     resolve['customer']= customer[0];
@@ -174,15 +169,25 @@ async function getBuildings({id}) {
     return resolve
 };
 
-async function getInterventions({building_id}) {
-    // Query intervention from PostgreSQL factintervention table
-    var intervention = await query_postgresql('SELECT * FROM factintervention WHERE building_id = ' + building_id)
-    resolve = intervention[0]
-    
-    // Query address from MySQL buildings table
-    address = await query_mysql('SELECT * FROM addresses WHERE entity = "Building" AND entity_id = ' + building_id)
 
-    resolve['address']= address[0];
+//To answer Question 3 by employee id
+async function getEmployees({id}) {
+    // Query employee from the MySQL buildings table
+    var employees = await query_mysql('SELECT * FROM employees WHERE id = ' + id )
+    resolve = employees[0]
+    console.log(employees)
+
+    // Query intervention from the MySQL buildings table
+    interventions = await query_postgresql('SELECT * FROM factintervention WHERE employee_id = ' + id)
+    result = interventions[0]
+    console.log(interventions)
+
+    // Query building details from the MySQL buildings table
+    building_details = await query_mysql('SELECT * FROM building_details WHERE building_id = ' + result.building_id)
+    console.log(building_details)
+
+    resolve['interventions']= interventions;
+    resolve['building_details']= building_details;
 
     return resolve
 };
@@ -223,6 +228,8 @@ var app = express();
 app.use('/graphql', graphqlHTTP({
     schema: schema,
     rootValue: root,
+// Before prof, set to false to desactivate GraphiQL GUI on the route /graphql
     graphiql: true
 }));
-app.listen(process.env.PORT || 4000, () => console.log('-- > Express GraphQL Server Now Running On localhost:4000/graphql'));
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`-- > Express server started on port ${PORT}`));
