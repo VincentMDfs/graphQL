@@ -5,6 +5,7 @@ const { graphqlHTTP } = require('express-graphql');
 var { buildSchema } = require('graphql');
 
 // MySQL operational DB connection BEGIN
+//env set in .env file
 var mysql = require('mysql');
 const con_mysql = mysql.createConnection({
   host: process.env.MYSQL_HOST,
@@ -172,12 +173,12 @@ async function getBuildings({id}) {
 
 //To answer Question 3 by employee id
 async function getEmployees({id}) {
-    // Query employee from the MySQL buildings table
+    // Query employee from the MySQL employees table
     var employees = await query_mysql('SELECT * FROM employees WHERE id = ' + id )
     resolve = employees[0]
     console.log(employees)
 
-    // Query intervention from the MySQL buildings table
+    // Query intervention from the PostgreSQL factintervention table
     interventions = await query_postgresql('SELECT * FROM factintervention WHERE employee_id = ' + id)
     result = interventions[0]
     console.log(interventions)
@@ -231,5 +232,6 @@ app.use('/graphql', graphqlHTTP({
 // Before prof, set to false to desactivate GraphiQL GUI on the route /graphql
     graphiql: true
 }));
+//PORT as env variable so Heroku can set a port
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`-- > Express server started on port ${PORT}`));
