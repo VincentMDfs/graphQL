@@ -188,12 +188,14 @@ async function getEmployees({id}) {
     result = interventions[0]
     console.log(interventions)
 
-    // Query building details from the MySQL  table
-    building_details = await query_mysql('SELECT * FROM building_details WHERE building_id = ' + result.building_id)
+    // Query building_details table in the MySQL DB to get key, value for each intervetion.
+    var j;
+    for (j = 0; j < interventions.length; j++){
+    building_details = await query_mysql('SELECT * FROM building_details WHERE building_id = ' + interventions[j].building_id)
+    interventions[j]['building_details']= building_details;
     console.log(building_details)
-
+    }   
     resolve['interventions']= interventions;
-    resolve['building_details']= building_details;
 
     return resolve
 };
