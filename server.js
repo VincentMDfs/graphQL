@@ -50,6 +50,9 @@ scalar DateTime
         buildings(id: Int!): Building
         interventions(id: Int!): Intervention
         employees(id: Int!): Employee
+        elevators(id: Int!): Elevator
+        columns(id: Int!): Column
+        batteries(id: Int!): Battery
     },
 
     type Building {
@@ -131,6 +134,49 @@ scalar DateTime
         status: String
         address: Address
     }
+
+    type Elevator {
+        id: Int!
+        column_id: Int
+        type_of_building: String
+        serial_number: String
+        model: String
+        status: String
+        date_of_commissioning: DateTime
+        date_of_last_inspection: DateTime
+        certificate_of_operations: String
+        information: String
+        notes: String
+        created_at: DateTime
+        updated_at: DateTime
+    }
+
+    type Column {
+        id: Int!
+        battery_id: Int
+        type_of_column: String
+        number_of_floors_served: Int
+        status: String
+        information: String
+        notes: String
+        created_at: DateTime
+        updated_at: DateTime
+    }
+
+    type Battery {
+        id: Int!
+        building_id: Int
+        type_of_battery: String
+        status: String
+        employee_id: Int
+        date_of_commissioning: DateTime
+        date_of_last_inspection: DateTime
+        certificate_of_operations: String
+        information: String
+        notes: String
+        created_at: DateTime
+        updated_at: DateTime
+    }
 `);
 
 // Root resolver
@@ -138,6 +184,10 @@ var root = {
     buildings: getBuildings,
     interventions: getInterventions,
     employees: getEmployees,
+    elevators: getElevatorStatus,
+    columns: getColumnStatus,
+    batteries: getBatteryStatus,
+    elevatorList: getElevatorList,
 };
 
 //To answer Question 1 by intervention id
@@ -199,6 +249,48 @@ async function getEmployees({id}) {
 
     return resolve
 };
+
+//REST query elevator status
+async function getElevatorStatus({id}) {
+
+    // Query the MySQL address table.
+    elevators = await query_mysql('SELECT * FROM elevators WHERE id = ' + id);
+    console.log(elevators)
+    resolve = elevators[0];
+
+    return resolve
+};
+
+//REST query column status
+async function getColumnStatus({id}) {
+
+    // Query the MySQL address table.
+    columns = await query_mysql('SELECT * FROM columns WHERE id = ' + id);
+    console.log(columns)
+    resolve = columns[0];
+
+    return resolve
+};
+//REST query battery status
+async function getBatteryStatus({id}) {
+
+// Query the MySQL address table.
+    batteries = await query_mysql('SELECT * FROM batteries WHERE id = ' + id);
+    console.log(batteries)
+    resolve = batteries[0];
+
+    return resolve
+};
+
+async function getElevatorList() {
+
+    // Query the MySQL address table.
+        elevatorList = await query_mysql('SELECT * FROM elevators WHERE status = "Inactive" OR status = "Intervention"');
+        console.log(elevatorList)
+        resolve = elevatorList;
+    
+        return resolve
+    };
 
 
 // Function used to query the MySQL operational DB BEGIN
