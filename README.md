@@ -26,9 +26,21 @@ The RESTapi is at https://rocketelevatorrestfulapi.azurewebsites.net/api/
 - Depending on your query idea, verify the information in the table you wish to query
 - Now in postman, navigate to the request you wish to modify
 - The "query" details are to be modified to your taste before pressing "Send"
-- Note that there is no "endpoints" per say, so the url will remain unchanged
-  
-## For additionnal information, please contact our dev team
+- See examples at the bottom of this readme
+- Note that there is only one endpoint, so the url will remain unchanged
 
-## See the GraphQL at:
-  https://github.com/VincentMDfs/graphQL
+## See the RESTapi at:
+  https://github.com/VincentMDfs/RESTapi2
+
+## Examples of GraphQL modifications
+
+{
+  batteries(id: ?) {
+    id
+		status
+  }
+}
+
+The question mark above can be replaced by any valid id number
+"batteries" can also be replaced by "columns" or "elevators"
+## For additionnal information, please contact our dev team
