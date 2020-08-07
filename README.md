@@ -2,7 +2,7 @@
 
 Welcome to the GraphQL project, week 8 in CodeBoxx
 
-The RESTapi is at https://rocketelevatorrestfulapi.azurewebsites.net/api/
+The GraphQL is at https://rocketelevators3.herokuapp.com/graphql
 
 ## Testing
 
@@ -26,21 +26,24 @@ The RESTapi is at https://rocketelevatorrestfulapi.azurewebsites.net/api/
 - Depending on your query idea, verify the information in the table you wish to query
 - Now in postman, navigate to the request you wish to modify
 - The "query" details are to be modified to your taste before pressing "Send"
-- See examples at the bottom of this readme
+- See examples at the bottom of this readme for reference
 - Note that there is only one endpoint, so the url will remain unchanged
 
-## See the RESTapi at:
+## Take a look at the RESTapi:
   https://github.com/VincentMDfs/RESTapi2
 
 ## Examples of GraphQL modifications
 
-{
+ {
   batteries(id: ?) {
-    id
-		status
-  }
-}
-
-The question mark above can be replaced by any valid id number
+	id
+	status
+   }
+ }
+ 
+ The question mark above can be replaced by any valid id number
 "batteries" can also be replaced by "columns" or "elevators"
+ 
+## For a list of all available queries, consult the server.js file!
+
 ## For additionnal information, please contact our dev team
