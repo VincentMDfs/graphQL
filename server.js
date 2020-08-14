@@ -53,6 +53,11 @@ scalar DateTime
         elevators(id: Int!): Elevator
         columns(id: Int!): Column
         batteries(id: Int!): Battery
+        interventionLists: [InterventionList]
+    },
+    type Mutation {
+        updateStartInterventions(id: Int!): InterventionList
+        updateEndInterventions(id: Int!): InterventionList
     },
 
     type Building {
@@ -177,6 +182,24 @@ scalar DateTime
         created_at: DateTime
         updated_at: DateTime
     }
+
+    type InterventionList {
+        id: Int
+        author: Int
+        customer_id: Int
+        building_id: Int
+        battery_id: Int
+        column_id: Int
+        elevator_id: Int
+        employee_id: Int
+        start_date: DateTime
+        end_date: DateTime
+        result: String
+        report: String
+        status: String
+        created_at: DateTime
+        updated_at: DateTime
+    }
 `);
 
 // Root resolver
@@ -187,7 +210,10 @@ var root = {
     elevators: getElevatorStatus,
     columns: getColumnStatus,
     batteries: getBatteryStatus,
-    elevatorList: getElevatorList,
+    elevatorLists: getElevatorList,
+    interventionLists: getInterventionList,
+    updateStartInterventions: updateStartInterventions,
+    updateEndInterventions: updateEndInterventions
 };
 
 //To answer Question 1 by intervention id
@@ -253,7 +279,7 @@ async function getEmployees({id}) {
 //REST query elevator status
 async function getElevatorStatus({id}) {
 
-    // Query the MySQL address table.
+    // Query the MySQL elevators table.
     elevators = await query_mysql('SELECT * FROM elevators WHERE id = ' + id);
     console.log(elevators)
     resolve = elevators[0];
@@ -264,7 +290,7 @@ async function getElevatorStatus({id}) {
 //REST query column status
 async function getColumnStatus({id}) {
 
-    // Query the MySQL address table.
+    // Query the MySQL columns table.
     columns = await query_mysql('SELECT * FROM columns WHERE id = ' + id);
     console.log(columns)
     resolve = columns[0];
@@ -274,7 +300,7 @@ async function getColumnStatus({id}) {
 //REST query battery status
 async function getBatteryStatus({id}) {
 
-// Query the MySQL address table.
+// Query the MySQL batteries table.
     batteries = await query_mysql('SELECT * FROM batteries WHERE id = ' + id);
     console.log(batteries)
     resolve = batteries[0];
@@ -284,10 +310,42 @@ async function getBatteryStatus({id}) {
 
 async function getElevatorList() {
 
-    // Query the MySQL address table.
+    // Query the MySQL elevators table.
         elevatorList = await query_mysql('SELECT * FROM elevators WHERE status = "Inactive" OR status = "Intervention"');
         console.log(elevatorList)
         resolve = elevatorList;
+    
+        return resolve
+    };
+
+async function getInterventionList() {
+
+    // Query the MySQL interventions table.
+        interventionList = await query_mysql('SELECT * FROM interventions WHERE status = "Pending" AND start_date IS NULL');
+        console.log(interventionList)
+        resolve = interventionList;
+    
+        return resolve
+    };
+async function updateStartInterventions({id}) {
+
+    // Query the MySQL batteries table.
+        intervStartUpdate = await query_mysql("UPDATE interventions SET status = 'InProgress', start_date = CURRENT_TIMESTAMP() WHERE Id = " + id);
+        intervStartShow = await query_mysql('SELECT * FROM interventions WHERE id = ' + id);
+        console.log(intervStartShow)
+        console.log(intervStartUpdate)
+        resolve = intervStartShow[0];
+    
+        return resolve
+    };
+async function updateEndInterventions({id}) {
+
+    // Query the MySQL batteries table.
+        intervEndUpdate = await query_mysql("UPDATE interventions SET status = 'Completed', end_date = CURRENT_TIMESTAMP() WHERE Id = " + id);
+        intervEndShow = await query_mysql('SELECT * FROM interventions WHERE id = ' + id);
+        console.log(intervEndUpdate)
+        console.log(intervEndShow)
+        resolve = intervEndShow[0];
     
         return resolve
     };
@@ -305,6 +363,8 @@ function query_mysql (queryStr) {
         })
     })
 };
+
+
 // Function used to query the MySQL DB END
 
 

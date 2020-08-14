@@ -1,0 +1,4 @@
+/node_modules
+nmp-debug.log
+.DS_Store
+/*.env
