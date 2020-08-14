@@ -2,7 +2,7 @@
 
 Welcome to the GraphQL project, week 8 in CodeBoxx
 
-The GraphQL is at https://rocketelevators3.herokuapp.com/graphql
+The GraphQL is at https://whispering-earth-03084.herokuapp.com/graphql
 
 ## Testing
 
