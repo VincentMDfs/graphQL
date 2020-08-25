@@ -54,6 +54,7 @@ scalar DateTime
         columns(id: Int!): Column
         batteries(id: Int!): Battery
         interventionLists: [InterventionList]
+        customerEmails(email: String!): Customer
     },
     type Mutation {
         updateStartInterventions(id: Int!): InterventionList
@@ -213,7 +214,8 @@ var root = {
     elevatorLists: getElevatorList,
     interventionLists: getInterventionList,
     updateStartInterventions: updateStartInterventions,
-    updateEndInterventions: updateEndInterventions
+    updateEndInterventions: updateEndInterventions,
+    customerEmails: getCustomerEmail
 };
 
 //To answer Question 1 by intervention id
@@ -349,6 +351,22 @@ async function updateEndInterventions({id}) {
     
         return resolve
     };
+
+
+// WEEK 11 ASPNETCORE
+
+// Checking if email is available in mysql customer table
+async function getCustomerEmail({email}) {
+
+    // Query the MySQL columns table.
+    singleQuote = "'"
+    CustomerEmail = await query_mysql('SELECT * FROM customers WHERE email = ' + singleQuote + email + singleQuote);
+    console.log(CustomerEmail)
+    resolve = CustomerEmail[0]
+    // If there is a match, return ALLOWED else return DENIED
+
+    return resolve
+};
 
 
 // Function used to query the MySQL operational DB BEGIN
