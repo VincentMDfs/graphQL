@@ -2,7 +2,7 @@
 
 Welcome to the GraphQL project, week 8 in CodeBoxx
 
-The GraphQL is at https://rocketelevators3.herokuapp.com/graphql
+The GraphQL is at https://whispering-earth-03084.herokuapp.com/graphql
 
 ## Testing
 
@@ -10,8 +10,7 @@ The GraphQL is at https://rocketelevators3.herokuapp.com/graphql
 - Ask VincentMDfs for a link to the "Team Workspace"
 - Once configured, you will have access to the dashboard
 - Navigate to the left of your screen into the collections
-- Enter the folder "CodeBoxx Week8 - Query Samples"
-- Here you will find 2 folders, one for REST, one for GraphQL
+- Enter the appropriate folder
 - The calls included in this week's Documentation are already prepared
 - Click on the request of your choice and a new tab will open
 - Simply click the blue "Send" button to start the request
@@ -43,6 +42,44 @@ The GraphQL is at https://rocketelevators3.herokuapp.com/graphql
  
  The question mark above can be replaced by any valid id number
 "batteries" can also be replaced by "columns" or "elevators"
+
+# Week 9
+
+## Postman queries
+- The connection steps above still apply although a new workspace was made
+- The queries contain mutations now, so it is slightly different
+- For mutations, check the body section of the queries
+- Note the mutation on the first line, the id on the line may be adjusted
+- There are "TESTs" queries to confirm updates if needed, but they will return some by default
+-Below is an example of the query
+
+mutation{updateStartInterventions(id: ?){
+id
+status
+start_date
+end_date
+}}
+
+- where ? will be replaced by the proper id number
+- note that the return values (id, status, etc) can be changed to your liking
+- All table entries can be returned here if needed, here they are:
+
+	id
+    	author
+    	customer_id
+    	building_id
+    	battery_id
+    	column_id
+    	elevator_id
+    	employee_id
+    	start_date
+    	end_date
+    	result
+    	report
+    	status
+    	created_at
+    	updated_at
+
  
 ## For a list of all available queries, consult the server.js file!
 
