@@ -59,6 +59,14 @@ scalar DateTime
         customerBatteries(id: Int!): [Battery]
         customerColumns(id: Int!): [Column]
         customerElevators(id: Int!): [Elevator]
+        cxList(email: String!): CX
+        
+    },
+    type CX {
+        Building: [Building]
+        Battery: [Battery]
+        Column: [Column]
+        Elevator: [Elevator]
     },
     type Mutation {
         updateStartInterventions(id: Int!): InterventionList
@@ -223,7 +231,8 @@ var root = {
     customerBuildings: getCustomerBuildings,
     customerBatteries: getCustomerBatteries,
     customerColumns: getCustomerColumns,
-    customerElevators: getCustomerElevators
+    customerElevators: getCustomerElevators,
+    cxList: getCxList
 };
 
 //To answer Question 1 by intervention id
@@ -363,7 +372,37 @@ async function updateEndInterventions({id}) {
 
 // WEEK 11 ASPNETCORE
 
-
+async function getCxList({email}) {
+    let Building = []
+    let Battery = []
+    let Column = []
+    let Elevator = []
+    // Query the MySQL customers table.
+    CustomerEmail = await query_mysql(`SELECT * FROM customers WHERE email = "${email}"`);
+    CustomerBuilding = await query_mysql(`SELECT * FROM buildings WHERE customer_id = ${CustomerEmail[0].id}`);
+    Building = CustomerBuilding
+    console.log(CustomerBuilding.length)
+    for (let i = 0; i < CustomerBuilding.length; i++) {
+        CustomerBattery = await query_mysql(`SELECT * FROM batteries WHERE building_id = ${CustomerBuilding[i].id} `);
+        Battery = Battery.concat(CustomerBattery)
+        for (let j = 0; j < CustomerBattery.length; j++) {
+            CustomerColumn = await query_mysql(`SELECT * FROM columns WHERE battery_id = ${CustomerBattery[j].id} `);
+            Column = Column.concat(CustomerColumn)
+            for (let k = 0; k < CustomerColumn.length; k++) {
+                CustomerElevator = await query_mysql(`SELECT * FROM elevators WHERE column_id = ${CustomerColumn[k].id} `);
+                Elevator = Elevator.concat(CustomerElevator)
+            }
+        } 
+    }
+    resolve = {
+        Building: [...Building],
+        Battery: [...Battery],
+        Column: [...Column],
+        Elevator: [...Elevator]}
+    console.log(resolve)
+    return resolve
+    
+};
 // To check in the registration page if the email is an existing customer
 async function getCustomerEmail({email}) {
 
