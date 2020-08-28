@@ -55,6 +55,10 @@ scalar DateTime
         batteries(id: Int!): Battery
         interventionLists: [InterventionList]
         customerEmails(email: String!): Customer
+        customerBuildings(email: String!): [Building]
+        customerBatteries(id: Int!): [Battery]
+        customerColumns(id: Int!): [Column]
+        customerElevators(id: Int!): [Elevator]
     },
     type Mutation {
         updateStartInterventions(id: Int!): InterventionList
@@ -215,7 +219,11 @@ var root = {
     interventionLists: getInterventionList,
     updateStartInterventions: updateStartInterventions,
     updateEndInterventions: updateEndInterventions,
-    customerEmails: getCustomerEmail
+    customerEmails: getCustomerEmail,
+    customerBuildings: getCustomerBuildings,
+    customerBatteries: getCustomerBatteries,
+    customerColumns: getCustomerColumns,
+    customerElevators: getCustomerElevators
 };
 
 //To answer Question 1 by intervention id
@@ -355,19 +363,62 @@ async function updateEndInterventions({id}) {
 
 // WEEK 11 ASPNETCORE
 
-// Checking if email is available in mysql customer table
+
+// To check in the registration page if the email is an existing customer
 async function getCustomerEmail({email}) {
 
-    // Query the MySQL columns table.
+    // Query the MySQL customers table.
     singleQuote = "'"
     CustomerEmail = await query_mysql('SELECT * FROM customers WHERE email = ' + singleQuote + email + singleQuote);
     console.log(CustomerEmail)
     resolve = CustomerEmail[0]
-    // If there is a match, return ALLOWED else return DENIED
 
     return resolve
 };
 
+// Select the buildings based on the customers email
+async function getCustomerBuildings({email}) {
+
+    // Query the MySQL buildings table.
+    customerBuildings = await query_mysql('SELECT b.id FROM buildings b JOIN customers c ON b.customer_id = c.id WHERE c.email = "' + email+'"' );
+    console.log(customerBuildings)
+    resolve = customerBuildings
+
+    return resolve
+};
+
+// Select the batteries based on the previously selected building id
+async function getCustomerBatteries({id}) {
+
+    // Query the MySQL columns table
+    customerBatteries = await query_mysql('SELECT * FROM batteries WHERE building_id = ' + id);
+    console.log(customerBatteries)
+    resolve = customerBatteries
+
+    return resolve
+};
+
+// Select the columns based on the previously selected battery id
+async function getCustomerColumns({id}) {
+
+    // Query the MySQL columns table.
+    customerColumns = await query_mysql('SELECT * FROM columns WHERE battery_id = ' + id);
+    console.log(customerColumns)
+    resolve = customerColumns
+
+    return resolve
+};
+
+// Select the elevators based on the previously selected column id
+async function getCustomerElevators({id}) {
+
+    // Query the MySQL columns table.
+    customerElevators = await query_mysql('SELECT * FROM elevators WHERE column_id = ' + id);
+    console.log(customerElevators)
+    resolve = customerElevators
+
+    return resolve
+};
 
 // Function used to query the MySQL operational DB BEGIN
 function query_mysql (queryStr) {
