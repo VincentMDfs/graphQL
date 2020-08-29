@@ -71,7 +71,7 @@ scalar DateTime
     type Mutation {
         updateStartInterventions(id: Int!): InterventionList
         updateEndInterventions(id: Int!): InterventionList
-        createIntervention(customer_id: Int!, building_id: Int!, battery_id: Int!, column_id: Int, elevator_id: Int, report: String): InterventionList
+        createIntervention(customer_id: Int!, building_id: Int!, battery_id: Int!, column_id: Int, elevator_id: Int, report: String): InterventionMutation
     },
 
     type Building {
@@ -214,6 +214,23 @@ scalar DateTime
         created_at: DateTime
         updated_at: DateTime
     }
+    type InterventionMutation {
+        id: Int
+        author: Int!
+        customer_id: Int!
+        building_id: Int!
+        battery_id: Int!
+        column_id: Int
+        elevator_id: Int
+        employee_id: Int
+        start_date: DateTime
+        end_date: DateTime
+        result: String!
+        report: String
+        status: String!
+        created_at: DateTime
+        updated_at: DateTime
+    }
 `);
 
 // Root resolver
@@ -234,7 +251,7 @@ var root = {
     customerColumns: getCustomerColumns,
     customerElevators: getCustomerElevators,
     cxList: getCxList,
-    createIntervention: createIntervention
+    createIntervention: updateCreateIntervention
 };
 
 //To answer Question 1 by intervention id
@@ -360,13 +377,13 @@ async function updateStartInterventions({id}) {
         return resolve
     };
 
-    async function createIntervention({customer_id, building_id, battery_id, column_id, elevator_id, result}) {
+    async function updateCreateIntervention({customer_id, building_id, battery_id, column_id, elevator_id, report}) {
 
         // Query the MySQL batteries table.
-            interventionCreation = await query_mysql("INSERT INTO interventions (author, customer_id, building_id, battery_id, column_id, elevator_id, result, report, status, created_at, updated_at ) VALUES(1,"+customer_id+","+building_id+","+battery_id+","+column_id+","+elevator_id+", 'incomplete',"+result+", 'pending', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());");
-            intervStartShow = await query_mysql('SELECT * FROM interventions WHERE id = ' + interventionCreation.insertId);
+            interventionCreation = await query_mysql("INSERT INTO interventions (author, customer_id, building_id, battery_id, column_id, elevator_id, result, report, status, created_at, updated_at ) VALUES(1,'"+customer_id+"','"+building_id+"','"+battery_id+"','"+column_id+"','"+elevator_id+"', 'incomplete','"+report+"', 'pending', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());");
+            interventionCreationShow = await query_mysql('SELECT * FROM interventions WHERE id = ' + interventionCreation.insertId);
             console.log(interventionCreation)
-            resolve = interventionCreation[0];
+            resolve = interventionCreationShow[0];
             return resolve
         };
 async function updateEndInterventions({id}) {
