@@ -71,7 +71,7 @@ scalar DateTime
     type Mutation {
         updateStartInterventions(id: Int!): InterventionList
         updateEndInterventions(id: Int!): InterventionList
-        createIntervention(customer_id: Int!, building_id: Int!, battery_id: Int!, column_id: Int!, elevator_id: Int!, report: String): InterventionList
+        createIntervention(customer_id: Int!, building_id: Int!, battery_id: Int!, column_id: Int, elevator_id: Int, report: String): InterventionList
     },
 
     type Building {
@@ -363,7 +363,7 @@ async function updateStartInterventions({id}) {
     async function createIntervention({customer_id, building_id, battery_id, column_id, elevator_id, result}) {
 
         // Query the MySQL batteries table.
-            interventionCreation = await query_mysql("INSERT INTO interventions (customer_id, building_id, battery_id, column_id, elevator_id, result, rapport, status, created_at, updated_at ) VALUES(" +customer_id+","+building_id+","+battery_id+","+column_id+","+elevator_id+", 'incomplete',"+result+", 'pending', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());");
+            interventionCreation = await query_mysql("INSERT INTO interventions (author, customer_id, building_id, battery_id, column_id, elevator_id, result, report, status, created_at, updated_at ) VALUES(1,"+customer_id+","+building_id+","+battery_id+","+column_id+","+elevator_id+", 'incomplete',"+result+", 'pending', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());");
             intervStartShow = await query_mysql('SELECT * FROM interventions WHERE id = ' + interventionCreation.insertId);
             console.log(interventionCreation)
             resolve = interventionCreation[0];
