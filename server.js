@@ -60,6 +60,7 @@ scalar DateTime
         customerColumns(id: Int!): [Column]
         customerElevators(id: Int!): [Elevator]
         cxList(email: String!): CX
+        employeeEmail(email: String!): Employee
         
     },
     type CX {
@@ -251,7 +252,8 @@ var root = {
     customerColumns: getCustomerColumns,
     customerElevators: getCustomerElevators,
     cxList: getCxList,
-    createIntervention: updateCreateIntervention
+    createIntervention: updateCreateIntervention,
+    employeeEmail: getEmployeeEmail
 };
 
 //To answer Question 1 by intervention id
@@ -438,6 +440,17 @@ async function getCustomerEmail({email}) {
     // Query the MySQL customers table.
     singleQuote = "'"
     CustomerEmail = await query_mysql('SELECT * FROM customers WHERE email = ' + singleQuote + email + singleQuote);
+    console.log(CustomerEmail)
+    resolve = CustomerEmail[0]
+
+    return resolve
+};
+
+async function getEmployeeEmail({email}) {
+
+    // Query the MySQL customers table.
+    singleQuote = "'"
+    CustomerEmail = await query_mysql('SELECT * FROM employees WHERE email = ' + singleQuote + email + singleQuote);
     console.log(CustomerEmail)
     resolve = CustomerEmail[0]
 
